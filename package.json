@@ -1,24 +1,17 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
-
-(async () => {
-  console.log('\n🔐 SETUP SOMARA');
-  console.log('Se abrirá Chrome. Ingresa a Somara, espera que cargue el formulario, luego cierra la ventana.\n');
-
-  const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
-  const page = await context.newPage();
-  await page.goto('https://intranet.somaracorporativo.net');
-  console.log('✅ Chrome abierto. Ingresa y cierra cuando veas el formulario.\n');
-
-  try { await page.waitForEvent('close', { timeout: 300000 }); } catch(e) {}
-
-  const cookies = await context.cookies();
-  const sessionDir = path.join(__dirname, '../sessions');
-  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir);
-  fs.writeFileSync(path.join(sessionDir, 'somara-cookies.json'), JSON.stringify(cookies, null, 2));
-  console.log('✅ Sesión de Somara guardada.\n');
-  await browser.close();
-  process.exit(0);
-})();
+{
+  "name": "movilidad-rpp",
+  "version": "1.0.0",
+  "description": "Agente taxi - Grupo RPP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "playwright": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
