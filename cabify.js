@@ -1,81 +1,41 @@
-const express = require('express');
-const cors = require('cors');
-const { reservarAloTaxi } = require('./platforms/alotaxi');
-const { reservarSomara } = require('./platforms/somara');
-const { reservarCabify } = require('./platforms/cabify');
-const { seleccionarPlataforma } = require('./utils/selector');
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+const COOKIES = path.join(__dirname, 'sessions', 'cabify-cookies.json');
+let ctx = null;
 
-const app = express();
+async function getCtx() {
+  if (ctx) return ctx;
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  if (fs.existsSync(COOKIES)) await ctx.addCookies(JSON.parse(fs.readFileSync(COOKIES, 'utf8')));
+  return ctx;
+}
 
-app.use(cors({ origin: '*' }));
-app.use(express.json());
-app.use(express.static('public'));
-
-// ─── Endpoint principal ─────────────────────────────────────────────────────
-app.post('/reservar', async (req, res) => {
-  const datos = req.body;
-
-  console.log(`\n🚗 NUEVA RESERVA: ${datos.nombre} → ${datos.destino} [${datos.tipo}]`);
-
+async function reservarCabify(datos) {
+  const context = await getCtx();
+  const page = await context.newPage();
   try {
-    const plataforma = datos.plataforma || seleccionarPlataforma(datos);
-    console.log(`   Plataforma: ${plataforma}`);
-
-    let resultado;
-
-    switch (plataforma) {
-      case 'ALO_TAXI':
-        resultado = await reservarAloTaxi(datos);
-        break;
-      case 'SOMARA':
-        resultado = await reservarSomara(datos);
-        break;
-      case 'CABIFY':
-        resultado = await reservarCabify(datos);
-        break;
-      default:
-        throw new Error('Plataforma no reconocida: ' + plataforma);
-    }
-
-    console.log(`✅ Reserva confirmada: N° ${resultado.numero_reserva}`);
-    res.json({ ok: true, ...resultado });
-
-  } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
-
-    if (error.message.startsWith('SESION_EXPIRADA_')) {
-      const plataforma = error.message.replace('SESION_EXPIRADA_', '');
-      res.status(401).json({
-        ok: false,
-        error: 'sesion_expirada',
-        plataforma,
-        mensaje: `La sesión de ${plataforma} expiró. Corre: npm run setup-${plataforma.toLowerCase()}`
-      });
-    } else {
-      res.status(500).json({
-        ok: false,
-        error: error.message,
-        mensaje: 'Error al ejecutar la reserva. Intenta de nuevo.'
-      });
-    }
-  }
-});
-
-// ─── Health check ─────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// ─── Inicio ───────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`\n🟢 Servidor Movilidad RPP corriendo en puerto ${PORT}`);
-  console.log(`   http://localhost:${PORT}`);
-  console.log(`\n   Sesiones activas:`);
-  ['alotaxi', 'somara', 'cabify'].forEach(p => {
-    const fs = require('fs');
-    const exists = fs.existsSync(`./sessions/${p}-cookies.json`);
-    console.log(`   ${exists ? '✅' : '❌'} ${p}`);
-  });
-  console.log('');
-});
+    await page.goto('https://cabify.com/app/order-new', { waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(2000);
+    const close = page.locator('button:has-text("No, gracias")').first();
+    if (await close.isVisible({ timeout: 2000 }).catch(() => false)) await close.click();
+    await page.locator('text=Para un invitado').first().click();
+    await page.locator('input[placeholder*="pasajero"]').first().fill(datos.nombre);
+    await page.locator('input[type="tel"]').first().fill(datos.celular);
+    const ori = page.locator('input[aria-label*="rigen"], input[placeholder*="rigen"]').first();
+    await ori.click(); await ori.type(datos.recojo, { delay: 50 }); await page.waitForTimeout(1500);
+    const s1 = page.locator('[class*="suggestion"], [role="option"]').first();
+    if (await s1.isVisible({ timeout: 2000 }).catch(() => false)) await s1.click();
+    const dest = page.locator('input[aria-label*="estino"], input[placeholder*="estino"]').first();
+    await dest.click(); await dest.type(datos.destino, { delay: 50 }); await page.waitForTimeout(1500);
+    const s2 = page.locator('[class*="suggestion"], [role="option"]').first();
+    if (await s2.isVisible({ timeout: 2000 }).catch(() => false)) await s2.click();
+    await page.waitForTimeout(1000);
+    const btn = page.locator('button:has-text("Pedir un viaje")').first();
+    await btn.waitFor({ state: 'visible', timeout: 5000 });
+    await btn.click(); await page.waitForTimeout(4000);
+    return { plataforma: 'Cabify para Empresas', numero_reserva: 'Ver app Cabify', pasajero: datos.nombre, celular: datos.celular, recojo: datos.recojo, destino: datos.destino, fecha_hora: 'Inmediato', contacto_cancelacion: 'App Cabify' };
+  } finally { await page.close(); }
+}
+module.exports = { reservarCabify };

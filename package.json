@@ -1,7 +1,7 @@
 {
   "name": "movilidad-rpp",
   "version": "1.0.0",
-  "description": "Agente taxi - Grupo RPP",
+  "description": "Agente de reservas de taxi - Grupo RPP",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

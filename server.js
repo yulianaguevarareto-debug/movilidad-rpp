@@ -1,46 +1,36 @@
-// scripts/setup-alotaxi.js
-// Ejecutar UNA vez en tu laptop para guardar la sesión de Aló Taxi
-// Comando: npm run setup-alotaxi
+const express = require('express');
+const cors = require('cors');
+const { reservarAloTaxi } = require('./alotaxi');
+const { reservarSomara } = require('./somara');
+const { reservarCabify } = require('./cabify');
+const { seleccionarPlataforma } = require('./selector');
 
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
+const app = express();
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 
-(async () => {
-  console.log('\n🔐 SETUP ALÓ TAXI');
-  console.log('─────────────────────────────────────────');
-  console.log('1. Se abrirá Chrome con Aló Taxi');
-  console.log('2. Ingresa con tu usuario y contraseña');
-  console.log('3. Cuando estés dentro del sistema, cierra esta ventana');
-  console.log('─────────────────────────────────────────\n');
-
-  const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext({
-    viewport: { width: 1280, height: 720 }
-  });
-  const page = await context.newPage();
-
-  await page.goto('https://intranet.alotaxis.com');
-  console.log('✅ Chrome abierto. Ingresa manualmente y cierra la ventana del navegador cuando termines.\n');
-
+app.post('/reservar', async (req, res) => {
+  const datos = req.body;
+  console.log(`\n🚗 RESERVA: ${datos.nombre} → ${datos.destino}`);
   try {
-    await page.waitForEvent('close', { timeout: 300000 }); // 5 minutos máximo
-  } catch (e) {}
+    const plataforma = datos.plataforma || seleccionarPlataforma(datos);
+    let resultado;
+    if (plataforma === 'ALO_TAXI') resultado = await reservarAloTaxi(datos);
+    else if (plataforma === 'SOMARA') resultado = await reservarSomara(datos);
+    else resultado = await reservarCabify(datos);
+    console.log(`✅ N° ${resultado.numero_reserva}`);
+    res.json({ ok: true, ...resultado });
+  } catch (error) {
+    console.error(`❌ ${error.message}`);
+    if (error.message.startsWith('SESION_EXPIRADA_')) {
+      res.status(401).json({ ok: false, error: 'sesion_expirada', mensaje: 'Sesión expirada. Renueva cookies.' });
+    } else {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  }
+});
 
-  const cookies = await context.cookies();
-  const storage = await context.storageState();
+app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-  const sessionDir = path.join(__dirname, '../sessions');
-  if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir);
-
-  fs.writeFileSync(
-    path.join(sessionDir, 'alotaxi-cookies.json'),
-    JSON.stringify(cookies, null, 2)
-  );
-
-  console.log('✅ Sesión de Aló Taxi guardada correctamente.');
-  console.log('   Ya puedes deployar el servidor.\n');
-
-  await browser.close();
-  process.exit(0);
-})();
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`\n🟢 Movilidad RPP corriendo en :${PORT}\n`));
