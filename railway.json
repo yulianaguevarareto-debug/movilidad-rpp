@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Movilidad RPP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:#f5f5f5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 40px}
+.hdr{width:100%;max-width:480px;background:#FFDD00;padding:13px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.logo{width:40px;height:40px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#FFDD00;letter-spacing:-.3px;flex-shrink:0}
+.hdr-txt h1{font-size:15px;font-weight:800;color:#111}
+.hdr-txt p{font-size:11px;color:#555}
+.wrap{width:100%;max-width:480px;padding:14px 14px 0}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.lbl{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:block}
+input[type=text],input[type=tel],input[type=date],input[type=time]{width:100%;padding:12px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;outline:none;background:#fafafa;color:#111;-webkit-appearance:none}
+input:focus{border-color:#FFDD00;background:#fff}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.tipo-row{display:flex;gap:10px}
+.tipo-btn{flex:1;padding:14px 8px;border:2px solid #e8e8e8;border-radius:12px;background:#fafafa;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.tipo-btn .ico{font-size:22px}
+.tipo-btn .lbl2{font-size:14px;font-weight:800;color:#111;margin:0}
+.tipo-btn .sub{font-size:11px;color:#888;margin:0}
+.tipo-btn.on{border-color:#FFDD00;background:#fffde7}
+.mot-row{display:flex;gap:8px}
+.mot-btn{flex:1;padding:12px 6px;border:2px solid #e8e8e8;border-radius:12px;background:#fafafa;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Inter',sans-serif}
+.mot-btn .mico{font-size:20px}
+.mot-btn .mlbl{font-size:12px;font-weight:700;color:#111;margin:0}
+.mot-btn.on{border-color:#FFDD00;background:#fffde7}
+.rpp-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#FFDD00;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif}
+.rel{position:relative}
+.dest-inp{padding-right:110px!important}
+.tog-row{display:flex;justify-content:space-between;align-items:center}
+.tog-info p{font-size:14px;font-weight:700;color:#111}
+.tog-info small{font-size:12px;color:#888}
+.tog{width:46px;height:26px;border-radius:13px;background:#ddd;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none}
+.tog.on{background:#FFDD00}
+.tog-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.tog.on .tog-thumb{transform:translateX(20px)}
+.dias{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.dia{width:36px;height:36px;border-radius:9px;border:2px solid #e8e8e8;background:#fafafa;cursor:pointer;font-weight:700;font-size:12px;color:#666;font-family:'Inter',sans-serif}
+.dia.on{border-color:#FFDD00;background:#FFDD00;color:#111}
+.submit-btn{width:100%;padding:16px;background:#111;border:none;border-radius:14px;font-size:15px;font-weight:800;color:#FFDD00;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:24px;opacity:.4;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn.ok{opacity:1}
+#cv{display:none}
+.ok-card{background:#fff;border-radius:14px;overflow:hidden;border:2px solid #4CAF50;box-shadow:0 4px 16px rgba(0,0,0,.1);margin-bottom:12px}
+.ok-hdr{background:#4CAF50;padding:16px 18px;color:#fff}
+.ok-hdr h2{font-size:20px;font-weight:800}
+.ok-hdr p{font-size:13px;opacity:.85;margin-top:4px}
+.err-card{background:#fff;border-radius:14px;overflow:hidden;border:2px solid #f44336;box-shadow:0 4px 16px rgba(0,0,0,.1);margin-bottom:12px}
+.err-hdr{background:#f44336;padding:16px 18px;color:#fff}
+.err-hdr h2{font-size:18px;font-weight:800}
+.field-row{display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid #f3f3f3;gap:10px}
+.field-row:last-child{border-bottom:none}
+.field-k{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+.field-v{font-size:14px;font-weight:600;color:#111;margin-top:2px}
+.back-btn{width:100%;padding:13px;background:transparent;border:1.5px solid #ddd;border-radius:14px;font-size:13px;font-weight:600;color:#666;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:24px}
+.loading{display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px}
+.spinner{width:48px;height:48px;border:4px solid #f3f3f3;border-top:4px solid #FFDD00;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:15px;font-weight:600;color:#555}
+.loading small{font-size:12px;color:#999}
+.plat-badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;margin-top:6px}
+.cancel-note{background:#fff3cd;border-radius:10px;padding:10px 14px;font-size:12px;color:#664d03;margin-bottom:12px;border:1px solid #ffd666}
+</style>
+</head>
+<body>
+
+<!-- IMPORTANTE: Cambiar por la URL real de tu backend en Railway -->
+<script>const API_URL = 'https://TU-PROYECTO.up.railway.app';</script>
+
+<div class="hdr">
+  <div class="logo">RPP</div>
+  <div class="hdr-txt">
+    <h1>Solicitud de Taxi</h1>
+    <p id="hdr-sub">Movilidad Corporativa · GMI</p>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="wrap" id="fv">
+  <div class="card">
+    <span class="lbl">¿Cuándo necesitas el taxi?</span>
+    <div class="tipo-row">
+      <button class="tipo-btn" id="btn-ahora" onclick="setTipo('ahora')"><span class="ico">⚡</span><span class="lbl2">Ahora</span><span class="sub">Inmediato</span></button>
+      <button class="tipo-btn" id="btn-agendar" onclick="setTipo('agendar')"><span class="ico">📅</span><span class="lbl2">Agendar</span><span class="sub">Con hora</span></button>
+    </div>
+    <div id="dt-row" style="display:none;margin-top:12px">
+      <div class="row2">
+        <div><span class="lbl" style="margin-top:4px">Fecha</span><input type="date" id="fecha" min="" oninput="check()"></div>
+        <div><span class="lbl" style="margin-top:4px">Hora</span><input type="time" id="hora" oninput="onHora()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Datos del pasajero</span>
+    <input type="text" placeholder="Nombre completo" id="nombre" oninput="check()" style="margin-bottom:10px">
+    <input type="tel" placeholder="Número de celular" id="celular" oninput="check()">
+  </div>
+
+  <div class="card">
+    <span class="lbl">Ruta</span>
+    <div class="rel" style="margin-bottom:10px">
+      <input type="text" placeholder="Dirección de recojo" id="recojo" oninput="check()" style="padding-right:118px">
+      <button class="rpp-btn" onclick="setRPP()">Desde Torre RPP</button>
+    </div>
+    <input type="text" placeholder="Dirección de destino (incluir distrito)" id="destino" oninput="onDestino()">
+    <div id="plat-hint" style="display:none;margin-top:10px;padding:9px 12px;border-radius:9px;border:1.5px solid;font-size:13px"></div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Motivo del traslado</span>
+    <div class="mot-row">
+      <button class="mot-btn" id="m0" onclick="setMotivo(0)"><span class="mico">📰</span><span class="mlbl">Comisión</span></button>
+      <button class="mot-btn" id="m1" onclick="setMotivo(1)"><span class="mico">🌙</span><span class="mlbl">Madrugada</span></button>
+      <button class="mot-btn" id="m2" onclick="setMotivo(2)"><span class="mico">🎙</span><span class="mlbl">Invitado</span></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tog-row">
+      <div class="tog-info"><p>¿Es rutina recurrente?</p><small>Agenda varias fechas en una sola reserva</small></div>
+      <button class="tog" id="tog" onclick="toggleRutina()"><div class="tog-thumb"></div></button>
+    </div>
+    <div id="dias-wrap" style="display:none">
+      <div class="dias">
+        <button class="dia" onclick="toggleDia(this,'L')">L</button><button class="dia" onclick="toggleDia(this,'M')">M</button>
+        <button class="dia" onclick="toggleDia(this,'Mi')">Mi</button><button class="dia" onclick="toggleDia(this,'J')">J</button>
+        <button class="dia" onclick="toggleDia(this,'V')">V</button><button class="dia" onclick="toggleDia(this,'S')">S</button>
+        <button class="dia" onclick="toggleDia(this,'D')">D</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="sub" onclick="solicitar()">🚗 Solicitar taxi</button>
+</div>
+
+<!-- RESULTADO -->
+<div class="wrap" id="cv">
+  <div id="result-card"></div>
+  <div class="cancel-note">ℹ️ Cancelaciones: <strong>Aló Taxi 946 149 200</strong> · <strong>Somara 961 742 998</strong></div>
+  <button class="back-btn" onclick="volver()">← Nueva solicitud</button>
+</div>
+
+<script>
+const RPP = 'Torre RPP, Av. Paseo de la República 3866, San Isidro, Lima';
+const SOMARA_K = ['barranco','brena','jesus maria','la victoria','lima','cercado','lince','magdalena','miraflores','pueblo libre','san isidro','san miguel','surquillo'];
+const MOTIVOS = [
+  {k:'COMISIONES PERIODISTICAS',lbl:'Comisiones periodísticas'},
+  {k:'HORARIO LABORAL ENTRE LAS 12:00 AM - 06:00 AM',lbl:'Horario laboral (madrugada)'},
+  {k:'INVITADOS PARA ENTREVISTAS',lbl:'Invitados para entrevista'}
+];
+const PLATS = {
+  CABIFY:{name:'Cabify para Empresas',color:'#7C3AED',bg:'#f3e8ff'},
+  SOMARA:{name:'Somara Corporativo',color:'#1565C0',bg:'#e8f0fe'},
+  ALO_TAXI:{name:'Aló Taxi',color:'#C62828',bg:'#fce8e8'}
+};
+
+let tipo='',motivo=-1,rutina=false,dias=[];
+const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const inSomara=a=>SOMARA_K.some(d=>norm(a).includes(d));
+const getPlatform=()=>{
+  if(tipo==='ahora')return'CABIFY';
+  return(inSomara(document.getElementById('destino').value)||inSomara(document.getElementById('recojo').value))?'SOMARA':'ALO_TAXI';
+};
+
+document.getElementById('fecha').min=new Date().toISOString().split('T')[0];
+
+function setTipo(t){tipo=t;document.getElementById('btn-ahora').classList.toggle('on',t==='ahora');document.getElementById('btn-agendar').classList.toggle('on',t==='agendar');document.getElementById('dt-row').style.display=t==='agendar'?'block':'none';check();}
+function onHora(){const h=document.getElementById('hora').value;if(h&&motivo===-1){const hr=parseInt(h.split(':')[0]);if(hr>=0&&hr<6)setMotivo(1);}check();}
+function onDestino(){const hint=document.getElementById('plat-hint');if(document.getElementById('destino').value&&tipo){const p=getPlatform();const cfg=PLATS[p];hint.style.display='block';hint.style.borderColor=cfg.color;hint.style.background=cfg.bg;hint.style.color=cfg.color;hint.innerHTML=`<strong>${cfg.name}</strong> — seleccionado automáticamente`;}else hint.style.display='none';check();}
+function setRPP(){document.getElementById('recojo').value=RPP;onDestino();}
+function setMotivo(i){motivo=i;[0,1,2].forEach(j=>document.getElementById('m'+j).classList.toggle('on',j===i));check();}
+function toggleRutina(){rutina=!rutina;document.getElementById('tog').classList.toggle('on',rutina);document.getElementById('dias-wrap').style.display=rutina?'block':'none';}
+function toggleDia(el,d){el.classList.toggle('on');dias=el.classList.contains('on')?[...dias,d]:dias.filter(x=>x!==d);}
+function check(){const ok=tipo&&document.getElementById('nombre').value.trim()&&document.getElementById('celular').value.trim()&&document.getElementById('destino').value.trim()&&motivo>-1&&(tipo==='ahora'||document.getElementById('hora').value);document.getElementById('sub').classList.toggle('ok',!!ok);onDestino();}
+function volver(){document.getElementById('fv').style.display='block';document.getElementById('cv').style.display='none';document.getElementById('hdr-sub').textContent='Movilidad Corporativa · GMI';}
+
+async function solicitar(){
+  if(!document.getElementById('sub').classList.contains('ok'))return;
+  const datos={
+    tipo,nombre:document.getElementById('nombre').value.trim(),
+    celular:document.getElementById('celular').value.trim(),
+    recojo:document.getElementById('recojo').value.trim()||RPP,
+    destino:document.getElementById('destino').value.trim(),
+    fecha:document.getElementById('fecha').value,
+    hora:document.getElementById('hora').value,
+    motivo:MOTIVOS[motivo].k,
+    motivo_label:MOTIVOS[motivo].lbl,
+    plataforma:getPlatform(),
+    rutina,dias
+  };
+
+  // Mostrar loading
+  document.getElementById('fv').style.display='none';
+  document.getElementById('cv').style.display='block';
+  document.getElementById('hdr-sub').textContent='Procesando reserva...';
+  document.getElementById('result-card').innerHTML=`
+    <div class="card loading">
+      <div class="spinner"></div>
+      <p>Ejecutando reserva en ${PLATS[datos.plataforma].name}...</p>
+      <small>Esto puede tomar 20-30 segundos</small>
+    </div>`;
+
+  try{
+    const res=await fetch(API_URL+'/reservar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+    const r=await res.json();
+
+    if(r.ok){
+      const cfg=PLATS[datos.plataforma];
+      document.getElementById('hdr-sub').textContent='✅ Reserva confirmada';
+      document.getElementById('result-card').innerHTML=`
+        <div class="ok-card">
+          <div class="ok-hdr">
+            <h2>✅ ¡Taxi reservado!</h2>
+            <p>N° de reserva: <strong>${r.numero_reserva}</strong></p>
+          </div>
+          <div class="field-row"><div><div class="field-k">Plataforma</div><div class="field-v">${r.plataforma}</div></div></div>
+          <div class="field-row"><div><div class="field-k">Pasajero</div><div class="field-v">${r.pasajero} · ${r.celular}</div></div></div>
+          <div class="field-row"><div><div class="field-k">Recojo</div><div class="field-v">${r.recojo}</div></div></div>
+          <div class="field-row"><div><div class="field-k">Destino</div><div class="field-v">${r.destino}</div></div></div>
+          <div class="field-row"><div><div class="field-k">Hora</div><div class="field-v">${r.fecha_hora}</div></div></div>
+          <div class="field-row"><div><div class="field-k">Cancelaciones</div><div class="field-v">${r.contacto_cancelacion}</div></div></div>
+        </div>`;
+    }else{
+      document.getElementById('hdr-sub').textContent='Error en la reserva';
+      document.getElementById('result-card').innerHTML=`
+        <div class="err-card">
+          <div class="err-hdr"><h2>⚠️ No se pudo completar</h2><p>${r.mensaje||'Error inesperado'}</p></div>
+          <div class="field-row"><div><div class="field-k">Detalle</div><div class="field-v">${r.error||''}</div></div></div>
+        </div>`;
+    }
+  }catch(e){
+    document.getElementById('hdr-sub').textContent='Error de conexión';
+    document.getElementById('result-card').innerHTML=`
+      <div class="err-card">
+        <div class="err-hdr"><h2>⚠️ Sin conexión</h2><p>No se pudo conectar al servidor. Intenta en unos segundos.</p></div>
+      </div>`;
+  }
+}
+</script>
+</body>
+</html>
